@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Setup Guide — ClassSync</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--navy:#0a1628;--navy-mid:#122040;--navy-card:#162545;--accent:#2563eb;--accent-2:#3b82f6;--white:#fff;--muted:#8ba3cc;--border:rgba(255,255,255,0.08);--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--radius:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.7;padding:40px 20px}
+.container{max-width:820px;margin:0 auto}
+h1{font-size:28px;font-weight:700;margin-bottom:6px;color:var(--white)}
+.subtitle{font-size:14px;color:var(--muted);margin-bottom:40px}
+.phase{margin-bottom:48px}
+.phase-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent-2);margin-bottom:12px}
+h2{font-size:20px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.step{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:14px;position:relative}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--accent);border-radius:50%;font-size:12px;font-weight:700;flex-shrink:0;margin-right:10px}
+.step-title{font-size:15px;font-weight:600;display:flex;align-items:center;margin-bottom:10px}
+.step-body{font-size:14px;color:var(--muted);padding-left:36px}
+.step-body p{margin-bottom:8px}
+code{font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);padding:2px 7px;border-radius:4px;font-size:13px;color:var(--accent-2)}
+pre{font-family:'DM Mono',monospace;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:13px;overflow-x:auto;margin:10px 0;color:#c9d8f5;line-height:1.6}
+.note{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--accent-2);margin-top:10px}
+.warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--amber);margin-top:10px}
+.success-box{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--green);margin-top:10px}
+.file-tree{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'DM Mono',monospace;font-size:13px;color:#c9d8f5;line-height:1.8;margin:10px 0}
+.file-tree .folder{color:var(--accent-2);font-weight:600}
+.file-tree .file{color:var(--green)}
+.divider{height:1px;background:var(--border);margin:40px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:rgba(255,255,255,.05);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--muted)}
+td:first-child{color:var(--white);font-weight:500}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🏛️ ClassSync — Complete Setup Guide</h1>
+<div class="subtitle">Step-by-step instructions for setting up the Classroom Management System from absolute zero. No prior experience needed.</div>
+
+<!-- ───────────────────────────────── PHASE 1 ───────── -->
+<div class="phase">
+<div class="phase-label">Phase 1</div>
+<h2>⬇️ Download & Install XAMPP</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">1</span> What is XAMPP?</div>
+  <div class="step-body">
+    <p>XAMPP is a free program that puts a web server (Apache) and a database (MySQL) on your laptop. Think of it like a mini internet server that lives only on your computer. You need it to run PHP files.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">2</span> Download XAMPP</div>
+  <div class="step-body">
+    <p>Go to this website in your browser:<br><code>https://www.apachefriends.org/download.html</code></p>
+    <p>Click the big <strong>Download</strong> button for <strong>Windows</strong>. The file is about 160 MB. Wait for it to finish downloading.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">3</span> Install XAMPP</div>
+  <div class="step-body">
+    <p>1. Double-click the downloaded file (it looks like <code>xampp-windows-x64-8.x.x-installer.exe</code>).</p>
+    <p>2. If Windows asks "Do you want to allow this app to make changes?" click <strong>Yes</strong>.</p>
+    <p>3. Click <strong>Next</strong> through all the screens. Leave everything at the default settings.</p>
+    <p>4. The install location will be <code>C:\xampp</code> — do NOT change this.</p>
+    <p>5. Click <strong>Finish</strong> when done.</p>
+    <div class="note">💡 If your antivirus warns you, it's a false alarm. XAMPP is safe and used by millions of developers worldwide.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">4</span> Start XAMPP</div>
+  <div class="step-body">
+    <p>1. Search for <strong>XAMPP Control Panel</strong> in the Windows Start menu and open it.</p>
+    <p>2. You will see a panel with rows: Apache, MySQL, FileZilla, etc.</p>
+    <p>3. Click the <strong>Start</strong> button next to <strong>Apache</strong>. The row should turn green.</p>
+    <p>4. Click the <strong>Start</strong> button next to <strong>MySQL</strong>. That row should also turn green.</p>
+    <div class="success-box">✅ Both Apache and MySQL should show green. That means your local server is running!</div>
+    <div class="warn">⚠️ If Apache fails to start, another program (like Skype or IIS) might be using port 80. In XAMPP Control Panel → Config → httpd.conf, change "Listen 80" to "Listen 8080". Then use <code>localhost:8080</code> instead of <code>localhost</code> everywhere in this guide.</div>
+  </div>
+</div>
+</div>
+
+<!-- ───────────────────────────────── PHASE 2 ───────── -->
+<div class="phase">
+<div class="phase-label">Phase 2</div>
+<h2>🗄️ Set Up the Database</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">5</span> Open phpMyAdmin</div>
+  <div class="step-body">
+    <p>phpMyAdmin is a visual interface to manage your MySQL database — like a spreadsheet app but for databases.</p>
+    <p>Open your browser and go to:</p>
+    <pre>http://localhost/phpmyadmin</pre>
+    <p>You should see a blue/white page with database tools. No login is needed by default.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">6</span> Import the Database Schema</div>
+  <div class="step-body">
+    <p>1. In phpMyAdmin, click <strong>Import</strong> in the top menu bar.</p>
+    <p>2. Click <strong>Choose File</strong>.</p>
+    <p>3. Navigate to wherever you saved the project files and select <strong>classroom_db.sql</strong>.</p>
+    <p>4. Scroll down and click the <strong>Import</strong> button (it's blue, at the bottom right).</p>
+    <p>5. Wait a few seconds. You should see a green success message.</p>
+    <div class="success-box">✅ You should now see "classroom_mgmt" appear in the left sidebar of phpMyAdmin. Clicking it will show you all the tables: departments, faculty, classrooms, etc.</div>
+    <div class="note">💡 The SQL file automatically creates the database, all tables, sample data, triggers, stored procedures, and views. You don't need to do anything else in the database.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">7</span> Verify the Data Loaded</div>
+  <div class="step-body">
+    <p>In phpMyAdmin's left sidebar, click <strong>classroom_mgmt</strong>, then click <strong>faculty</strong>. You should see 7 teachers listed including Mrs. Jyoti Sharma.</p>
+    <p>Click <strong>classrooms</strong> — you should see 8 rooms including B811.</p>
+  </div>
+</div>
+</div>
+
+<!-- ───────────────────────────────── PHASE 3 ───────── -->
+<div class="phase">
+<div class="phase-label">Phase 3</div>
+<h2>📁 Set Up the Project Files</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">8</span> Create the Project Folder</div>
+  <div class="step-body">
+    <p>Your XAMPP server serves files from a special folder called <strong>htdocs</strong>. Any file placed here can be accessed in a browser.</p>
+    <p>Open Windows Explorer (the file manager) and navigate to:</p>
+    <pre>C:\xampp\htdocs</pre>
+    <p>Create a new folder here called <code>classroom</code>.</p>
+    <p>Your full path should be: <code>C:\xampp\htdocs\classroom</code></p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">9</span> Copy the Project Files</div>
+  <div class="step-body">
+    <p>Copy these 3 files you downloaded into the <code>classroom</code> folder:</p>
+    <div class="file-tree">
+<span class="folder">C:\xampp\htdocs\classroom\</span>
+├── <span class="file">index.html</span>        ← The main website (connected to MySQL)
+├── <span class="file">api.php</span>           ← The PHP backend (talks to MySQL)
+└── <span class="file">classroom_db.sql</span>  ← Already imported, just keep it here
+    </div>
+    <div class="note">💡 Make sure the files are directly inside the <code>classroom</code> folder, not inside another subfolder.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">10</span> Check api.php Settings</div>
+  <div class="step-body">
+    <p>Open <code>api.php</code> with Notepad (right-click → Open with → Notepad).</p>
+    <p>Near the top, look for these lines:</p>
+    <pre>$host = "localhost";
+$user = "root";
+$pass = "";        // default XAMPP password is empty
+$db   = "classroom_mgmt";</pre>
+    <p>For a fresh XAMPP install, these settings are already correct — the MySQL username is <code>root</code> and the password is blank. You don't need to change anything.</p>
+    <div class="warn">⚠️ If you previously set a password for MySQL, enter it in the <code>$pass</code> line like: <code>$pass = "yourpassword";</code></div>
+  </div>
+</div>
+</div>
+
+<!-- ───────────────────────────────── PHASE 4 ───────── -->
+<div class="phase">
+<div class="phase-label">Phase 4</div>
+<h2>🚀 Run the Application</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">11</span> Open the Application</div>
+  <div class="step-body">
+    <p>Make sure Apache and MySQL are still running (green) in the XAMPP Control Panel.</p>
+    <p>Open your browser (Chrome is recommended) and go to:</p>
+    <pre>http://localhost/classroom/index.html</pre>
+    <p>The ClassSync dashboard should load with a navy blue interface.</p>
+    <div class="success-box">✅ In the top-right corner you should see: <strong style="color:#22c55e">⬤ MySQL Connected</strong> — this means the website is talking to your database successfully!</div>
+    <div class="warn">⚠️ If you see "⬤ DB Offline" in red, double-check that MySQL is running in XAMPP and that the <code>api.php</code> database settings are correct.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">12</span> Test the Check-In Feature</div>
+  <div class="step-body">
+    <p>Let's simulate Mrs. Jyoti entering room B811 to teach Processor Architecture to SY IT students:</p>
+    <p>1. Click <strong>Check-In</strong> in the left sidebar.</p>
+    <p>2. Select <strong>Mrs. Jyoti Sharma</strong> from the Faculty dropdown.</p>
+    <p>3. Select <strong>B811 (Classroom)</strong> from the Room dropdown.</p>
+    <p>4. Select <strong>Processor Architecture (IT201)</strong> from the Subject dropdown.</p>
+    <p>5. Select <strong>Year 2 Div-A · Information Technology</strong> from the Class dropdown.</p>
+    <p>6. Click the blue <strong>✅ Check In</strong> button.</p>
+    <p>7. Now click <strong>Dashboard</strong> — you will see B811 is now marked <span style="color:#ef4444">Occupied</span> with Mrs. Jyoti's session live!</p>
+    <div class="success-box">✅ This is stored directly in your MySQL database. Go to phpMyAdmin → classroom_mgmt → live_sessions to see the record!</div>
+  </div>
+</div>
+</div>
+
+<!-- ───────────────────────────────── PHASE 5 ───────── -->
+<div class="phase">
+<div class="phase-label">Phase 5</div>
+<h2>📘 How the System Works</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">13</span> File Roles Explained</div>
+  <div class="step-body">
+    <table>
+      <thead><tr><th>File</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>index.html</td><td>The visual website. Everything you see and click. Uses JavaScript to fetch data from api.php and display it. No page reloads.</td></tr>
+        <tr><td>api.php</td><td>The middleman. Receives requests from index.html, runs MySQL queries, and sends back the data as JSON.</td></tr>
+        <tr><td>classroom_db.sql</td><td>The database blueprint. Creates all tables, sample data, triggers, stored procedures, and views. Only needed once during import.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">14</span> The Flow — What Happens When You Click Check-In</div>
+  <div class="step-body">
+    <pre>You click "Check In" in the browser
+       ↓
+index.html sends a request to api.php?action=checkin
+       ↓
+api.php calls MySQL stored procedure: sp_faculty_checkin()
+       ↓
+MySQL TRIGGER fires: checks if room is already occupied
+       ↓
+If free → inserts into live_sessions table
+Another TRIGGER fires → writes to audit_log automatically
+       ↓
+api.php sends back "SUCCESS"
+       ↓
+index.html shows green toast: "Check-in successful!"
+Dashboard updates to show the room as Occupied</pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">15</span> Database Tables Overview</div>
+  <div class="step-body">
+    <table>
+      <thead><tr><th>Table</th><th>Stores</th></tr></thead>
+      <tbody>
+        <tr><td>departments</td><td>IT, CS, ELEX, MECH departments</td></tr>
+        <tr><td>faculty</td><td>All teachers — name, code, email, designation</td></tr>
+        <tr><td>classrooms</td><td>Rooms — B811, LAB101 etc. with capacity & amenities</td></tr>
+        <tr><td>subjects</td><td>Courses like Processor Architecture, DBMS, etc.</td></tr>
+        <tr><td>years</td><td>Classes — FY IT-A, SY CS-B, etc.</td></tr>
+        <tr><td>timetable_slots</td><td>Pre-planned weekly schedule (Mon–Sat)</td></tr>
+        <tr><td>live_sessions</td><td>Real-time check-ins (who is teaching where right now)</td></tr>
+        <tr><td>reservations</td><td>Advance room bookings</td></tr>
+        <tr><td>audit_log</td><td>Every action ever taken — auto-filled by triggers</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ───────────────────────────────── PHASE 6 ───────── -->
+<div class="phase">
+<div class="phase-label">Phase 6</div>
+<h2>🔧 Troubleshooting Common Problems</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">16</span> "DB Offline" shown in top-right</div>
+  <div class="step-body">
+    <p><strong>Problem:</strong> The website can't connect to MySQL.</p>
+    <p><strong>Fix checklist:</strong></p>
+    <p>1. Is MySQL running (green) in XAMPP Control Panel? If not, click Start next to MySQL.</p>
+    <p>2. Did the SQL import succeed? Check phpMyAdmin for the <code>classroom_mgmt</code> database.</p>
+    <p>3. Did you open the page as <code>http://localhost/classroom/index.html</code>? (Not by double-clicking the file!)</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">17</span> "Apache not starting" error</div>
+  <div class="step-body">
+    <p><strong>Problem:</strong> Port 80 is already used by another program.</p>
+    <p><strong>Fix:</strong> In XAMPP Control Panel, click <strong>Config</strong> next to Apache → <strong>httpd.conf</strong>. Find the line <code>Listen 80</code> and change it to <code>Listen 8080</code>. Save and restart Apache. Then open the app at <code>http://localhost:8080/classroom/index.html</code>. Also update the first line in <code>index.html</code> where it says <code>const API = "http://localhost/classroom/api.php"</code> to <code>http://localhost:8080/classroom/api.php</code>.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">18</span> Page loads but dropdowns are empty</div>
+  <div class="step-body">
+    <p><strong>Problem:</strong> api.php can't be found or has an error.</p>
+    <p><strong>Fix:</strong> Open <code>http://localhost/classroom/api.php?action=get_faculty</code> in your browser. You should see JSON text. If you see a blank page or PHP error, check that <code>api.php</code> is in the right folder.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">19</span> "Room already in use" even for empty rooms</div>
+  <div class="step-body">
+    <p><strong>Problem:</strong> A previous test session is still marked "ongoing" in the database.</p>
+    <p><strong>Fix:</strong> Go to phpMyAdmin → classroom_mgmt → live_sessions → find the row where <code>status = 'ongoing'</code> → click Edit → change status to <code>completed</code> → click Save. Or click Check-Out in the app.</p>
+  </div>
+</div>
+</div>
+
+<!-- ───────────────────────────────── QUICK REFERENCE ───── -->
+<div class="divider"></div>
+<div class="phase">
+<div class="phase-label">Quick Reference</div>
+<h2>📌 URLs & Paths Cheat Sheet</h2>
+<div class="step">
+  <div class="step-body" style="padding-left:0">
+    <table>
+      <thead><tr><th>What</th><th>Where / URL</th></tr></thead>
+      <tbody>
+        <tr><td>Main Application</td><td><code>http://localhost/classroom/index.html</code></td></tr>
+        <tr><td>Database Admin</td><td><code>http://localhost/phpmyadmin</code></td></tr>
+        <tr><td>API Test (faculty)</td><td><code>http://localhost/classroom/api.php?action=get_faculty</code></td></tr>
+        <tr><td>API Test (live)</td><td><code>http://localhost/classroom/api.php?action=get_live_sessions</code></td></tr>
+        <tr><td>Project folder</td><td><code>C:\xampp\htdocs\classroom\</code></td></tr>
+        <tr><td>XAMPP Control Panel</td><td>Start Menu → XAMPP Control Panel</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div style="text-align:center;padding:20px 0;color:var(--muted);font-size:13px">
+  ClassSync — Classroom Management System · Built with MySQL, PHP, HTML, CSS, JavaScript
+</div>
+
+</div>
+</body>
+</html>

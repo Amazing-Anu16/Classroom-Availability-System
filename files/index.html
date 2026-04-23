@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClassSync — Classroom Management System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root{
+  --navy:       #0a1628;
+  --navy-mid:   #122040;
+  --navy-light: #1a3060;
+  --navy-card:  #162545;
+  --accent:     #2563eb;
+  --accent-2:   #3b82f6;
+  --white:      #ffffff;
+  --off-white:  #f0f4ff;
+  --muted:      #8ba3cc;
+  --border:     rgba(255,255,255,0.08);
+  --green:      #22c55e;
+  --red:        #ef4444;
+  --amber:      #f59e0b;
+  --radius:     10px;
+  --shadow:     0 4px 24px rgba(0,0,0,0.35);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:inherit;outline:none}
+
+header{
+  background:var(--navy-mid);border-bottom:1px solid var(--border);
+  padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-text{font-size:15px;font-weight:700}
+.logo-sub{font-size:11px;color:var(--muted);font-weight:400}
+.header-right{display:flex;align-items:center;gap:16px}
+.live-dot{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
+.live-dot::before{content:'';width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+#clock{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted)}
+#db-status{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+#db-status.ok{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+#db-status.err{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+
+.layout{display:flex;height:calc(100vh - 60px)}
+.sidebar{width:200px;min-width:200px;background:var(--navy-mid);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--white)}
+.nav-item.active{background:rgba(37,99,235,.12);color:var(--accent-2);border-left-color:var(--accent-2)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.nav-divider{height:1px;background:var(--border);margin:8px 16px}
+
+.main{flex:1;overflow-y:auto;padding:24px}
+.page{display:none}.page.active{display:block}
+.section-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;flex-direction:column;gap:4px}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.stat-value{font-size:28px;font-weight:700;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted)}
+.stat-green{color:var(--green)}.stat-red{color:var(--red)}.stat-amber{color:var(--amber)}.stat-blue{color:var(--accent-2)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:4px}
+.room-tile{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:transform .2s}
+.room-tile:hover{transform:translateY(-2px)}
+.room-tile.occupied{border-color:rgba(239,68,68,.4)}
+.room-tile.available{border-color:rgba(34,197,94,.25)}
+.tile-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.room-code{font-size:18px;font-weight:700;font-family:'DM Mono',monospace}
+.status-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.badge-occupied{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.badge-available{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.tile-faculty{font-size:13px;font-weight:600;margin-bottom:3px}
+.tile-subject{font-size:12px;color:var(--muted);margin-bottom:3px}
+.tile-class{font-size:11px;color:var(--accent-2)}
+.tile-time{font-size:11px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace}
+.tile-cap{font-size:11px;color:var(--muted);margin-top:4px}
+
+.schedule-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.schedule-item:last-child{border-bottom:none}
+.sched-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:72px;padding-top:1px}
+.sched-info{flex:1}
+.sched-room{font-size:13px;font-weight:600}
+.sched-detail{font-size:12px;color:var(--muted)}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:rgba(255,255,255,.04);color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:span 2}
+label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+input,select,textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--white);font-size:13px;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--navy-mid);color:var(--white)}
+textarea{resize:vertical;min-height:70px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:6px;font-size:13px;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-2)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--white);border:1px solid var(--border)}.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+.checkin-box{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:560px}
+.form-actions{display:flex;gap:10px;margin-top:16px}
+
+.tt-grid{display:grid;grid-template-columns:80px repeat(6,1fr);gap:2px;font-size:12px}
+.tt-head{background:rgba(255,255,255,.05);padding:8px;text-align:center;font-weight:600;color:var(--muted);border-radius:4px;font-size:11px;text-transform:uppercase}
+.tt-time{background:rgba(255,255,255,.03);padding:8px;text-align:right;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;border-radius:4px;display:flex;align-items:center;justify-content:flex-end}
+.tt-cell{background:rgba(255,255,255,.03);padding:6px;border-radius:4px;min-height:52px}
+.tt-entry{background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.3);border-radius:4px;padding:4px 6px;height:100%;font-size:11px}
+.tt-entry .te-room{font-weight:700;color:var(--accent-2)}
+.tt-entry .te-sub{color:var(--muted)}
+
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;font-size:13px;max-width:320px;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:var(--shadow)}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{border-color:rgba(34,197,94,.4);color:var(--green)}
+#toast.error{border-color:rgba(239,68,68,.4);color:var(--red)}
+#toast.info{border-color:rgba(37,99,235,.4);color:var(--accent-2)}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--navy-mid);border:1px solid var(--border);border-radius:14px;padding:28px;width:min(520px,92vw);box-shadow:var(--shadow)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+
+@media(max-width:900px){.sidebar{display:none}.stats-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🏛️</div>
+    <div>
+      <div class="logo-text">ClassSync</div>
+      <div class="logo-sub">Classroom Management System</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div id="db-status" class="err">⬤ Connecting…</div>
+    <div class="live-dot">Live</div>
+    <div id="clock">--:--:--</div>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="sidebar">
+  <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="showPage('rooms')"><span class="nav-icon">🚪</span> Rooms</div>
+  <div class="nav-item" onclick="showPage('checkin')"><span class="nav-icon">✅</span> Check-In</div>
+  <div class="nav-item" onclick="showPage('reserve')"><span class="nav-icon">📅</span> Reserve</div>
+  <div class="nav-divider"></div>
+  <div class="nav-item" onclick="showPage('timetable')"><span class="nav-icon">🗓️</span> Timetable</div>
+  <div class="nav-item" onclick="showPage('faculty')"><span class="nav-icon">👩‍🏫</span> Faculty</div>
+  <div class="nav-item" onclick="showPage('audit')"><span class="nav-icon">📋</span> Audit Log</div>
+</nav>
+
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="section-title">Live Dashboard</div>
+    <div class="section-sub" id="today-label">Loading…</div>
+    <div class="stats-row">
+      <div class="stat-card"><span class="stat-label">Total Rooms</span><span class="stat-value stat-blue" id="stat-total">—</span><span class="stat-sub">all buildings</span></div>
+      <div class="stat-card"><span class="stat-label">Occupied Now</span><span class="stat-value stat-red" id="stat-occupied">—</span><span class="stat-sub">ongoing sessions</span></div>
+      <div class="stat-card"><span class="stat-label">Available</span><span class="stat-value stat-green" id="stat-available">—</span><span class="stat-sub">rooms free</span></div>
+      <div class="stat-card"><span class="stat-label">Sessions Today</span><span class="stat-value stat-amber" id="stat-today">—</span><span class="stat-sub">completed + ongoing</span></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">🔴 Currently Ongoing</div><div id="live-list"><div class="spinner"></div></div></div>
+      <div class="card"><div class="card-title">📆 Today's Schedule</div><div id="today-schedule"><div class="spinner"></div></div></div>
+    </div>
+    <div class="section-title" style="font-size:15px;margin-bottom:12px">Room Overview</div>
+    <div class="room-grid" id="room-overview"></div>
+  </div>
+
+  <!-- ROOMS -->
+  <div id="page-rooms" class="page">
+    <div class="section-title">Classrooms & Labs</div>
+    <div class="section-sub">Real-time availability of all rooms</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="filterRooms('all')">All</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterRooms('available')">✅ Available</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterRooms('occupied')">🔴 Occupied</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterRooms('Classroom')">Classrooms</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterRooms('Lab')">Labs</button>
+    </div>
+    <div class="room-grid" id="rooms-grid"></div>
+  </div>
+
+  <!-- CHECK-IN -->
+  <div id="page-checkin" class="page">
+    <div class="section-title">Faculty Check-In / Check-Out</div>
+    <div class="section-sub">Mark presence and start a live session</div>
+    <div class="grid-2" style="align-items:start">
+      <div class="checkin-box">
+        <div class="card-title">New Check-In</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Faculty</label><select id="ci-faculty"><option value="">Loading…</option></select></div>
+          <div class="form-group"><label>Room (Available Only)</label><select id="ci-room"><option value="">Loading…</option></select></div>
+          <div class="form-group"><label>Subject</label><select id="ci-subject"><option value="">Loading…</option></select></div>
+          <div class="form-group"><label>Class / Year</label><select id="ci-year"><option value="">Loading…</option></select></div>
+          <div class="form-group full"><label>Notes (optional)</label><textarea id="ci-notes" placeholder="Any additional info…"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btn-checkin" onclick="doCheckIn()">✅ Check In</button>
+          <button class="btn btn-ghost" onclick="clearCheckin()">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Active Sessions — Check Out</div>
+        <div id="active-sessions-list"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESERVE -->
+  <div id="page-reserve" class="page">
+    <div class="section-title">Room Reservations</div>
+    <div class="section-sub">Book a room in advance</div>
+    <div class="grid-2" style="align-items:start">
+      <div class="checkin-box">
+        <div class="card-title">New Reservation</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Faculty</label><select id="res-faculty"><option value="">Loading…</option></select></div>
+          <div class="form-group"><label>Room</label><select id="res-room"><option value="">Loading…</option></select></div>
+          <div class="form-group"><label>Date</label><input type="date" id="res-date"/></div>
+          <div class="form-group"><label>Start Time</label><input type="time" id="res-start"/></div>
+          <div class="form-group"><label>End Time</label><input type="time" id="res-end"/></div>
+          <div class="form-group full"><label>Purpose</label><input type="text" id="res-purpose" placeholder="e.g. Extra lecture, Seminar…"/></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="doReserve()">📅 Reserve</button>
+          <button class="btn btn-ghost" onclick="clearReserve()">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Upcoming Reservations</div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Room</th><th>Faculty</th><th>Date</th><th>Time</th><th>Purpose</th><th>Status</th></tr></thead>
+          <tbody id="reservations-tbody"><tr><td colspan="6" style="color:var(--muted);text-align:center">Loading…</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMETABLE -->
+  <div id="page-timetable" class="page">
+    <div class="section-title">Weekly Timetable</div>
+    <div class="section-sub">Pre-planned schedule — Mon to Sat</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <label style="color:var(--muted);font-size:12px">Room:</label>
+      <select id="tt-filter-room" onchange="renderTimetable()" style="max-width:140px"><option value="">All</option></select>
+      <label style="color:var(--muted);font-size:12px">Faculty:</label>
+      <select id="tt-filter-faculty" onchange="renderTimetable()" style="max-width:180px"><option value="">All</option></select>
+    </div>
+    <div class="card"><div id="timetable-container" style="overflow-x:auto"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- FACULTY -->
+  <div id="page-faculty" class="page">
+    <div class="section-title">Faculty Directory</div>
+    <div class="section-sub">All registered teaching staff</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table><thead><tr><th>#</th><th>Name</th><th>Code</th><th>Department</th><th>Designation</th><th>Email</th><th>Status</th></tr></thead>
+        <tbody id="faculty-tbody"><tr><td colspan="7" style="color:var(--muted);text-align:center">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIT -->
+  <div id="page-audit" class="page">
+    <div class="section-title">Audit Log</div>
+    <div class="section-sub">Full activity trail from MySQL audit_log table</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table><thead><tr><th>Time</th><th>Action</th><th>Faculty</th><th>Detail</th></tr></thead>
+        <tbody id="audit-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div id="toast"></div>
+
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <div class="modal-title">Confirm Check-Out</div>
+    <p id="checkout-msg" style="font-size:13px;color:var(--muted);line-height:1.8"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-checkout-btn">End Session</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — Change this if your folder name is different
+   ══════════════════════════════════════════════════════ */
+const API = "http://localhost/classroom/api.php";
+
+/* ── Cache ────────────────────────────────────────────── */
+let CACHE = { rooms:[], faculty:[], subjects:[], years:[], liveSessions:[], timetable:[], reservations:[] };
+
+/* ── API call wrapper ─────────────────────────────────── */
+async function api(action, params={}, method='GET') {
+  try {
+    let url = `${API}?action=${action}`;
+    Object.entries(params).forEach(([k,v])=> url += `&${k}=${encodeURIComponent(v)}`);
+    const opts = { method };
+    if(method==='POST'){
+      opts.headers = {'Content-Type':'application/json'};
+      opts.body = JSON.stringify(params);
+      url = `${API}?action=${action}`;
+    }
+    const res = await fetch(url, opts);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    return data;
+  } catch(e) {
+    console.error(action, e);
+    throw e;
+  }
+}
+
+/* ── DB Status check ─────────────────────────────────── */
+async function checkDB(){
+  try {
+    await api('init');
+    document.getElementById('db-status').textContent = '⬤ MySQL Connected';
+    document.getElementById('db-status').className = 'ok';
+  } catch(e){
+    document.getElementById('db-status').textContent = '⬤ DB Offline';
+    document.getElementById('db-status').className = 'err';
+  }
+}
+
+/* ── Helpers ─────────────────────────────────────────── */
+function fmtTime(str){ if(!str) return '—'; const d=new Date(str); return isNaN(d)?str:d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function fmtDate(str){ if(!str) return '—'; const d=new Date(str+'T00:00'); return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function dayName(){ return new Date().toLocaleDateString('en-US',{weekday:'long'}); }
+function elapsed(dt){ return Math.floor((new Date()-new Date(dt))/60000); }
+
+function populateSelect(id, items, valueFn, labelFn, placeholder='Select…'){
+  const el = document.getElementById(id);
+  const cur = el.value;
+  el.innerHTML = `<option value="">${placeholder}</option>` +
+    items.map(i=>`<option value="${valueFn(i)}">${labelFn(i)}</option>`).join('');
+  if(cur) el.value=cur;
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════════════════ */
+const pageLoaders = {
+  dashboard: renderDashboard,
+  rooms:     ()=>renderRoomsPage('all'),
+  checkin:   renderCheckin,
+  reserve:   renderReserve,
+  timetable: initTimetable,
+  faculty:   renderFaculty,
+  audit:     renderAudit,
+};
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if(pageLoaders[page]) pageLoaders[page]();
+}
+
+/* ══════════════════════════════════════════════════════
+   DASHBOARD
+   ══════════════════════════════════════════════════════ */
+async function renderDashboard(){
+  document.getElementById('today-label').textContent = `${dayName()}, ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})}`;
+
+  const [rooms, live, today_tt] = await Promise.all([
+    api('get_rooms'),
+    api('get_live_sessions'),
+    api('get_today_timetable'),
+  ]);
+
+  CACHE.rooms = rooms;
+  CACHE.liveSessions = live;
+
+  const occupiedIds = live.map(s=>+s.room_id);
+  const avail = rooms.filter(r=>!occupiedIds.includes(+r.room_id));
+
+  document.getElementById('stat-total').textContent    = rooms.length;
+  document.getElementById('stat-occupied').textContent = live.length;
+  document.getElementById('stat-available').textContent= avail.length;
+  document.getElementById('stat-today').textContent    = '—'; // needs separate query
+
+  // Live list
+  const liveEl = document.getElementById('live-list');
+  liveEl.innerHTML = live.length ? live.map(s=>`
+    <div class="schedule-item">
+      <div class="sched-time">${fmtTime(s.check_in_time)}<br><span style="color:var(--green);font-size:10px">+${s.minutes_elapsed}m</span></div>
+      <div class="sched-info">
+        <div class="sched-room"><span style="color:var(--accent-2)">${s.room_code}</span> — ${s.faculty_name}</div>
+        <div class="sched-detail">${s.subject_name} · ${s.class_info}</div>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px;padding:8px 0">No active sessions right now.</div>';
+
+  // Today schedule
+  const schedEl = document.getElementById('today-schedule');
+  schedEl.innerHTML = today_tt.length ? today_tt.map(s=>`
+    <div class="schedule-item">
+      <div class="sched-time">${s.start_time}–${s.end_time}</div>
+      <div class="sched-info">
+        <div class="sched-room">${s.room_code} — ${s.faculty_name}</div>
+        <div class="sched-detail">${s.subject_name} · ${s.class_info}</div>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px;padding:8px 0">No classes scheduled today.</div>';
+
+  // Room tiles
+  document.getElementById('room-overview').innerHTML = rooms.map(r=>{
+    const s = live.find(l=>+l.room_id===+r.room_id);
+    if(s) return `<div class="room-tile occupied">
+      <div class="tile-header"><span class="room-code">${r.room_code}</span><span class="status-badge badge-occupied">Occupied</span></div>
+      <div class="tile-faculty">${s.faculty_name}</div>
+      <div class="tile-subject">${s.subject_name}</div>
+      <div class="tile-class">${s.class_info} · ${s.dept_name}</div>
+      <div class="tile-time">Since ${fmtTime(s.check_in_time)} · ${s.minutes_elapsed}m</div>
+    </div>`;
+    return `<div class="room-tile available">
+      <div class="tile-header"><span class="room-code">${r.room_code}</span><span class="status-badge badge-available">Free</span></div>
+      <div class="tile-subject" style="color:var(--muted)">${r.room_type}</div>
+      <div class="tile-cap">👥 ${r.seating_cap} ${r.has_projector=='1'?'📽 ':''} ${r.has_ac=='1'?'❄️':''}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   ROOMS PAGE
+   ══════════════════════════════════════════════════════ */
+async function renderRoomsPage(filter){
+  const [rooms, live] = await Promise.all([api('get_rooms'), api('get_live_sessions')]);
+  CACHE.rooms=rooms; CACHE.liveSessions=live;
+  const occupiedIds = live.map(s=>+s.room_id);
+  let filtered = rooms;
+  if(filter==='available') filtered=rooms.filter(r=>!occupiedIds.includes(+r.room_id));
+  else if(filter==='occupied') filtered=rooms.filter(r=>occupiedIds.includes(+r.room_id));
+  else if(['Classroom','Lab','Seminar Hall'].includes(filter)) filtered=rooms.filter(r=>r.room_type===filter);
+
+  document.getElementById('rooms-grid').innerHTML = filtered.map(r=>{
+    const s = live.find(l=>+l.room_id===+r.room_id);
+    if(s) return `<div class="room-tile occupied">
+      <div class="tile-header"><span class="room-code">${r.room_code}</span><span class="status-badge badge-occupied">Occupied</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${r.building} · Floor ${r.floor_number}</div>
+      <div class="tile-faculty">${s.faculty_name}</div>
+      <div class="tile-subject">${s.subject_name} (${s.subject_code||''})</div>
+      <div class="tile-class">${s.class_info}</div>
+      <div class="tile-time">Since ${fmtTime(s.check_in_time)} · ${s.minutes_elapsed}m elapsed</div>
+    </div>`;
+    return `<div class="room-tile available">
+      <div class="tile-header"><span class="room-code">${r.room_code}</span><span class="status-badge badge-available">Available</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${r.building} · Floor ${r.floor_number} · ${r.room_type}</div>
+      <div class="tile-cap">👥 ${r.seating_cap} ${r.has_projector=='1'?'· 📽 Projector':''} ${r.has_ac=='1'?'· ❄️ AC':''}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted)">No rooms match filter.</div>';
+}
+function filterRooms(f){ renderRoomsPage(f); }
+
+/* ══════════════════════════════════════════════════════
+   CHECK-IN
+   ══════════════════════════════════════════════════════ */
+async function renderCheckin(){
+  const [faculty, rooms, subjects, years, live] = await Promise.all([
+    api('get_faculty'), api('get_available_rooms'),
+    api('get_subjects'), api('get_years'), api('get_live_sessions'),
+  ]);
+  CACHE.liveSessions = live;
+  populateSelect('ci-faculty', faculty, f=>f.faculty_id, f=>f.full_name);
+  populateSelect('ci-room', rooms, r=>r.room_id, r=>`${r.room_code} (${r.room_type})`);
+  populateSelect('ci-subject', subjects, s=>s.subject_id, s=>`${s.subject_name} (${s.subject_code})`);
+  populateSelect('ci-year', years, y=>y.year_id, y=>`Year ${y.year_number} Div-${y.division} · ${y.dept_name}`);
+  renderActiveSessionsList(live);
+}
+
+function renderActiveSessionsList(live){
+  const el = document.getElementById('active-sessions-list');
+  if(!live.length){ el.innerHTML='<div style="color:var(--muted);font-size:13px">No active sessions.</div>'; return; }
+  el.innerHTML = live.map(s=>`
+    <div class="schedule-item" style="flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:13px;font-weight:600">${s.room_code} — ${s.faculty_name}</div>
+          <div style="font-size:12px;color:var(--muted)">${s.subject_name} · ${s.class_info}</div>
+          <div style="font-size:11px;color:var(--green);margin-top:2px">Since ${fmtTime(s.check_in_time)} · ${s.minutes_elapsed}min</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="promptCheckout(${s.session_id},'${s.faculty_name}','${s.room_code}','${s.subject_name}',${s.minutes_elapsed})">Check Out</button>
+      </div>
+    </div>`).join('');
+}
+
+async function doCheckIn(){
+  const roomId    = document.getElementById('ci-room').value;
+  const facultyId = document.getElementById('ci-faculty').value;
+  const subjectId = document.getElementById('ci-subject').value;
+  const yearId    = document.getElementById('ci-year').value;
+  const notes     = document.getElementById('ci-notes').value;
+
+  if(!roomId||!facultyId||!subjectId||!yearId){ toast('Please fill all required fields.','error'); return; }
+
+  const btn = document.getElementById('btn-checkin');
+  btn.innerHTML='<div class="spinner"></div> Checking in…'; btn.disabled=true;
+  try {
+    const res = await api('checkin',{room_id:roomId,faculty_id:facultyId,subject_id:subjectId,year_id:yearId,notes},'POST');
+    toast(res.message,'success');
+    clearCheckin();
+    await renderCheckin();
+  } catch(e){ toast(e.message,'error'); }
+  btn.innerHTML='✅ Check In'; btn.disabled=false;
+}
+
+let pendingCheckoutId=null;
+function promptCheckout(sessionId, faculty, room, subject, mins){
+  document.getElementById('checkout-msg').innerHTML =
+    `End session by <strong>${faculty}</strong> in <strong>${room}</strong><br>Subject: ${subject}<br>Duration: ${mins} minutes`;
+  pendingCheckoutId = sessionId;
+  document.getElementById('confirm-checkout-btn').onclick = doCheckOut;
+  document.getElementById('checkout-modal').classList.add('open');
+}
+async function doCheckOut(){
+  try {
+    const res = await api('checkout',{session_id:pendingCheckoutId},'POST');
+    toast(res.message,'info');
+    closeModal();
+    await renderCheckin();
+  } catch(e){ toast(e.message,'error'); closeModal(); }
+}
+function closeModal(){ document.getElementById('checkout-modal').classList.remove('open'); }
+function clearCheckin(){
+  ['ci-faculty','ci-room','ci-subject','ci-year'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ci-notes').value='';
+}
+
+/* ══════════════════════════════════════════════════════
+   RESERVATIONS
+   ══════════════════════════════════════════════════════ */
+async function renderReserve(){
+  const [faculty, rooms, res] = await Promise.all([api('get_faculty'),api('get_rooms'),api('get_reservations')]);
+  populateSelect('res-faculty',faculty,f=>f.faculty_id,f=>f.full_name);
+  populateSelect('res-room',rooms,r=>r.room_id,r=>`${r.room_code} (${r.room_type})`);
+  document.getElementById('res-date').min = today();
+  const tbody = document.getElementById('reservations-tbody');
+  if(!res.length){ tbody.innerHTML='<tr><td colspan="6" style="color:var(--muted);text-align:center">No upcoming reservations.</td></tr>'; return; }
+  tbody.innerHTML=res.map(r=>{
+    const c=r.status==='approved'?'var(--green)':r.status==='pending'?'var(--amber)':'var(--red)';
+    return `<tr><td><strong>${r.room_code}</strong></td><td>${r.faculty_name}</td>
+      <td>${fmtDate(r.reservation_date)}</td>
+      <td style="font-family:'DM Mono',monospace">${r.start_time}–${r.end_time}</td>
+      <td>${r.purpose||'—'}</td>
+      <td><span style="color:${c};font-size:11px;font-weight:600;text-transform:uppercase">${r.status}</span></td></tr>`;
+  }).join('');
+}
+async function doReserve(){
+  const roomId=document.getElementById('res-room').value, facultyId=document.getElementById('res-faculty').value,
+        date=document.getElementById('res-date').value, start=document.getElementById('res-start').value,
+        end=document.getElementById('res-end').value, purpose=document.getElementById('res-purpose').value;
+  if(!roomId||!facultyId||!date||!start||!end){ toast('Fill all fields.','error'); return; }
+  if(start>=end){ toast('End time must be after start time.','error'); return; }
+  try {
+    const res=await api('reserve',{room_id:roomId,faculty_id:facultyId,date,start,end,purpose},'POST');
+    toast(res.message,'success'); clearReserve(); await renderReserve();
+  } catch(e){ toast(e.message,'error'); }
+}
+function clearReserve(){
+  ['res-room','res-faculty','res-date','res-start','res-end','res-purpose'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ══════════════════════════════════════════════════════
+   TIMETABLE
+   ══════════════════════════════════════════════════════ */
+async function initTimetable(){
+  const [rooms, faculty] = await Promise.all([api('get_rooms'),api('get_faculty')]);
+  const rf=document.getElementById('tt-filter-room');
+  if(rf.options.length===1) rooms.forEach(r=>{ const o=new Option(r.room_code,r.room_id); rf.add(o); });
+  const ff=document.getElementById('tt-filter-faculty');
+  if(ff.options.length===1) faculty.forEach(f=>{ const o=new Option(f.full_name,f.faculty_id); ff.add(o); });
+  await renderTimetable();
+}
+async function renderTimetable(){
+  const roomId=document.getElementById('tt-filter-room').value;
+  const facultyId=document.getElementById('tt-filter-faculty').value;
+  const slots = await api('get_timetable',{room_id:roomId||'',faculty_id:facultyId||''});
+  const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const times=[...new Set(slots.map(s=>s.start_time))].sort();
+  const today=dayName();
+  let html=`<div class="tt-grid">
+    <div class="tt-head">Time</div>
+    ${days.map(d=>`<div class="tt-head" ${d===today?'style="color:var(--accent-2)"':''}>${d.slice(0,3)}</div>`).join('')}`;
+  times.forEach(t=>{
+    html+=`<div class="tt-time">${t}</div>`;
+    days.forEach(day=>{
+      const s=slots.find(x=>x.start_time===t&&x.day_of_week===day);
+      html+=s?`<div class="tt-cell"><div class="tt-entry">
+        <div class="te-room">${s.room_code}</div>
+        <div class="te-sub">${s.subject_name}</div>
+        <div class="te-sub" style="color:var(--muted)">${s.faculty_name.split(' ').slice(-1)[0]}</div>
+      </div></div>`:`<div class="tt-cell"></div>`;
+    });
+  });
+  document.getElementById('timetable-container').innerHTML=html+'</div>';
+}
+
+/* ══════════════════════════════════════════════════════
+   FACULTY
+   ══════════════════════════════════════════════════════ */
+async function renderFaculty(){
+  const [faculty, live] = await Promise.all([api('get_faculty'),api('get_live_sessions')]);
+  document.getElementById('faculty-tbody').innerHTML=faculty.map((f,i)=>{
+    const s=live.find(l=>+l.faculty_id===+f.faculty_id);
+    const statusHtml=s?`<span style="color:var(--green);font-size:11px;font-weight:600">● In ${s.room_code}</span>`
+      :`<span style="color:var(--muted);font-size:11px">Available</span>`;
+    return `<tr><td style="color:var(--muted)">${i+1}</td><td><strong>${f.full_name}</strong></td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${f.employee_code}</td>
+      <td>${f.dept_name}</td><td style="color:var(--muted);font-size:12px">${f.designation}</td>
+      <td style="font-size:12px;color:var(--muted)">${f.email||'—'}</td><td>${statusHtml}</td></tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   AUDIT LOG
+   ══════════════════════════════════════════════════════ */
+async function renderAudit(){
+  const logs=await api('get_audit');
+  const tbody=document.getElementById('audit-tbody');
+  if(!logs.length){ tbody.innerHTML='<tr><td colspan="4" style="color:var(--muted);text-align:center">No entries yet.</td></tr>'; return; }
+  const colors={CHECK_IN:'var(--green)',CHECK_OUT:'var(--amber)',RESERVE:'var(--accent-2)'};
+  tbody.innerHTML=logs.map(l=>`<tr>
+    <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${fmtTime(l.action_time)}</td>
+    <td><span style="color:${colors[l.action_type]||'var(--muted)'};font-size:11px;font-weight:600">${l.action_type}</span></td>
+    <td>${l.faculty_name||'System'}</td>
+    <td style="font-size:12px;color:var(--muted)">${l.action_detail}</td>
+  </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════════════ */
+function toast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`show ${type}`;
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+/* ── Clock ──────────────────────────────────────────── */
+function tickClock(){
+  document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+}
+setInterval(tickClock,1000); tickClock();
+
+/* ── Auto-refresh ─────────────────────────────────── */
+setInterval(()=>{
+  if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+  if(document.getElementById('page-rooms').classList.contains('active')) renderRoomsPage('all');
+},20000);
+
+/* ── Init ─────────────────────────────────────────── */
+checkDB();
+renderDashboard();
+</script>
+</body>
+</html>
